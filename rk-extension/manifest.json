@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Radix Kingdoms - Novo Layout",
+  "version": "1.24.0",
+  "description": "Substitui a interface do Radix Kingdoms: mapa com todos os reinos, botões dentro do mapa e visão isométrica do reino com imagens 2D. Wallet conecta direto na origem do site.",
+  "permissions": [],
+  "host_permissions": [
+    "https://radixkingdoms.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://radixkingdoms.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["main.js"],
+      "matches": ["https://radixkingdoms.com/*"]
+    },
+    {
+      "resources": ["imagens/*.png"],
+      "matches": ["https://radixkingdoms.com/*"]
+    }
+  ],
+  "action": {
+    "default_title": "Radix Kingdoms - Novo Layout"
+  }
+}
