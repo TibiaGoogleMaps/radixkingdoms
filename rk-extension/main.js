@@ -121,19 +121,44 @@
     };
   }
   const BUILD_COSTS = { mine: 300, barracks: 500, trezor: 750, stronghold: 1000, mage_tower: 5000, research_academy: 3000, obscura_temple: 5000 };
-  const BUILD_TIMES = { mine: 21600, barracks: 28800, trezor: 28800, stronghold: 36000, mage_tower: 43200, research_academy: 43200, obscura_temple: 43200 };
   const BUILD_MAX = { mine: 3, barracks: 4, trezor: 1, stronghold: 1, mage_tower: 4, research_academy: 1, obscura_temple: 1 };
+  const BUILD_TIMES = { mine: 21600, barracks: 28800, trezor: 28800, stronghold: 36000, mage_tower: 43200, research_academy: 43200, obscura_temple: 43200 };
   const BUILD_NAMES = {
-    mine: "⛏️ Mine", barracks: "🏛️ Barracks", trezor: `KGLD Trezor`, stronghold: "🏰 Stronghold",
-    mage_tower: "🔮 Mage Tower", research_academy: "📚 Research Academy", obscura_temple: "🛡️ Obscura Temple",
+    mine: "⛏️ Mine", barracks: "⚔️ Barracks", trezor: `💰 Trezor`, stronghold: "🏰 Stronghold",
+    mage_tower: "🔮 Mage Tower", research_academy: "🎓 Research Acadamy", obscura_temple: "🛕 Obscura Temple",
   };
-  const BUILD_ICONS = { mine: "⛏️", barracks: "⚔️", trezor: "KGLD", stronghold: "🏰", mage_tower: "🔮", research_academy: "🎓", obscura_temple: "🌀" };
+  const BUILD_ICONS = { mine: "⛏️", barracks: "⚔️", trezor: "💰", stronghold: "🏰", mage_tower: "🔮", research_academy: "🎓", obscura_temple: "🛕" };
   const COOLDOWNS = { attack: 14400, raid: 14400, fortify: 14400, missile: 14400 }; // segundos
   const BUILD_COUNT_KEY = {
     mine: "mine", barracks: "barracks", trezor: "trezorCount",
     stronghold: "stronghold", mage_tower: "mageTower",
     research_academy: "researchAcademy", obscura_temple: "obscuraTemple",
   };
+
+  // Detecta o nível de zoom do navegador (Ctrl +/-) para que possamos
+  // aplicar um counter-scale nos elementos da UI e eles manterem
+  // tamanho/posição fixos, como a grama.png (background-size) já faz.
+  function detectBrowserZoom() {
+    // Método: comparar a largura visível de um elemento de 100px CSS
+    // com 100px reais. Quando há zoom, 100px CSS vira 100*zoom px reais.
+    const probe = document.createElement("div");
+    probe.style.cssText = "position:absolute;left:-9999px;top:-9999px;width:100px;height:100px;visibility:hidden;pointer-events:none;";
+    document.body.appendChild(probe);
+    const z = probe.getBoundingClientRect().width / 100;
+    probe.remove();
+    return z;
+  }
+  function applyBrowserZoomFix() {
+    const z = detectBrowserZoom();
+    if (!z || !isFinite(z) || z <= 0) return;
+    const inv = 1 / z;
+    const ground = $("#rk-iso-ground");
+    const buildings = $("#rk-iso-buildings");
+    if (ground) ground.style.transform = `scale(${z})`;
+    if (ground) ground.style.transformOrigin = "center center";
+    if (buildings) buildings.style.transform = `scale(${inv})`;
+    if (buildings) buildings.style.transformOrigin = "center bottom";
+  }
   const BUILD_ACTION = {
     mine: { label: `KGLD Reivindicar mineração`, fn: () => actionClaim() },
     barracks: { label: "⚔️ Recrutar defensores", fn: () => actionRecruit() },
@@ -330,7 +355,7 @@ button{font-family:inherit;}
 .mkt-v{font-size:12px;color:var(--txt);}
 #rk-float-actions{position:absolute;top:12px;right:12px;z-index:6;display:flex;flex-direction:column;gap:8px;max-width:200px;}
 #rk-float-actions .btn{font-size:12px;padding:7px 12px;text-align:left;box-shadow:0 4px 14px rgba(0,0,0,.5);}
-#rk-castle-actions2{position:absolute;left:12px;bottom:12px;z-index:6;display:flex;flex-direction:column;gap:8px;max-width:230px;max-height:calc(100% - 24px);overflow-y:auto;}
+#rk-castle-actions2{position:absolute;left:12px;bottom:12px;z-index:60;display:flex;flex-direction:column;gap:8px;max-width:230px;max-height:calc(100% - 24px);overflow-y:auto;}
 .prod-card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 14px rgba(0,0,0,.5);}
 .prod-head{font-size:12px;font-weight:600;color:var(--gold2);}
 .prod-cost{font-size:10px;color:var(--dim);}
@@ -387,40 +412,20 @@ button{font-family:inherit;}
 .ikb{position:relative;display:flex;flex-direction:column;align-items:center;max-width:150px;cursor:default;}
 .ikb img{display:block;width:auto;max-height:130px;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(0,0,0,.45));}
 .ikb.building img{opacity:.55;filter:grayscale(.3) brightness(.8) drop-shadow(0 8px 10px rgba(0,0,0,.45));}
-.ikb .ikb-tag{display:flex;flex-direction:column;align-items:center;margin-top:4px;background:rgba(0,0,0,.55);border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:11px;line-height:1.2;pointer-events:none;}
+.ikb .ikb-tag{display:flex;flex-direction:column;align-items:center;margin-top:4px;background:rgba(0,0,0,.55);border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:11px;line-height:1.2;}
 .ikb .ikb-tag b{color:var(--gold2);}
 .ikb .ikb-tag small{color:var(--dim);font-size:9px;}
 .ikb.max img{opacity:.85;}
 .ikb.empty img{opacity:.25;filter:grayscale(.8) brightness(.5) drop-shadow(0 8px 10px rgba(0,0,0,.45));}
 .ikb.empty .ikb-tag{border-style:dashed;opacity:.8;}
-.ikb-badge{position:absolute;top:-6px;left:50%;transform:translateX(-50%);background:linear-gradient(180deg,#6b5210,#3a2c06);border:1px solid var(--gold);color:var(--gold2);font-size:11px;font-weight:600;border-radius:999px;padding:2px 10px;white-space:nowrap;box-shadow:0 4px 10px rgba(0,0,0,.5);z-index:2;max-width:none;pointer-events:none;}
-.ikb-badge.ready{background:linear-gradient(180deg,#1a5c22,#0c3311);border-color:var(--ok);color:#7ee787;cursor:pointer;pointer-events:auto;}
-.ikb-badge.busy{background:linear-gradient(180deg,#20405c,#10222f);border-color:var(--blue);color:#9cc8ff;pointer-events:none;}
+.ikb-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(180deg,#6b5210,#3a2c06);border:1px solid var(--gold);color:var(--gold2);font-size:11px;font-weight:600;border-radius:10px;padding:3px 10px;white-space:nowrap;width:max-content;box-shadow:0 4px 10px rgba(0,0,0,.5);z-index:2;display:flex;flex-direction:column-reverse;align-items:center;gap:1px;}
+.ikb-badge [data-rk-countdown]{font-weight:700;color:#fff;}
+.ikb-badge.ready{background:linear-gradient(180deg,#1a5c22,#0c3311);border-color:var(--ok);color:#7ee787;cursor:pointer;}
+.ikb-badge.busy{background:linear-gradient(180deg,#20405c,#10222f);border-color:var(--blue);color:#9cc8ff;}
 .ikb.clickable{cursor:pointer;}
 .ikb.clickable img{transition:transform .15s ease;}
 .ikb.clickable:hover img{transform:translateY(-3px);}
 .ikb.clickable:hover .ikb-tag{background:rgba(20,20,30,.8);border-color:var(--gold2);}
-
-/* ---- Castle layout editor (drag buildings) ---- */
-#rk-iso-buildings.rk-edit-mode{position:absolute;inset:0;display:block;background:rgba(0,0,0,0);height:100%;width:100%;}
-#rk-iso-buildings.rk-edit-mode .ikb{position:absolute;cursor:move;transition:box-shadow .15s,opacity .15s;outline:1px dashed rgba(212,175,55,.6);outline-offset:4px;opacity:1 !important;}
-#rk-iso-buildings.rk-edit-mode .ikb img{opacity:1 !important;filter:none !important;}
-#rk-iso-buildings.rk-edit-mode .ikb.empty img{opacity:1 !important;filter:none !important;}
-#rk-iso-buildings.rk-edit-mode .ikb:hover{outline:1px dashed var(--gold2);outline-offset:4px;background:rgba(212,175,55,.08);}
-#rk-iso-buildings.rk-edit-mode .ikb.dragging{opacity:.85 !important;box-shadow:0 0 0 2px var(--gold2),0 10px 30px rgba(0,0,0,.7);outline:2px dashed var(--gold2);}
-.rk-coord{position:absolute;top:-28px;left:0;background:rgba(0,0,0,.85);color:var(--gold2);border:1px solid var(--gold);font-size:9px;font-weight:700;padding:2px 4px;border-radius:4px;white-space:nowrap;z-index:10;font-family:monospace;display:inline-flex;align-items:center;gap:4px;pointer-events:auto;flex-wrap:nowrap;}
-.rk-coord .rk-coord-text{flex:0 1 auto;font-size:9px;line-height:1;}
-.rk-size-btn{background:var(--gold);color:#000;border:1px solid #000;font-size:11px;font-weight:900;width:20px;height:20px;min-width:20px;max-width:20px;min-height:20px;max-height:20px;line-height:1;border-radius:4px;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;font-family:monospace;flex:0 0 20px;box-sizing:border-box;overflow:hidden;}
-.rk-size-btn:hover{background:#fff;color:#000;}
-.rk-size-minus{background:#a04040;color:#fff;}
-.rk-size-minus:hover{background:#ff5050;color:#fff;}
-.rk-size-plus{background:#2da13b;color:#fff;border-color:#000;}
-.rk-size-plus:hover{background:#7ee787;color:#000;}
-.rk-resize-handle{position:absolute;bottom:0;right:0;width:14px;height:14px;background:var(--gold2);border:1px solid #000;cursor:nwse-resize;z-index:11;border-radius:2px;}
-.rk-resize-handle:hover{background:#fff;}
-#rk-edit-toolbar{position:absolute;top:8px;right:8px;display:flex;gap:6px;z-index:5;background:rgba(0,0,0,.55);border:1px solid var(--gold);border-radius:8px;padding:4px;align-items:center;}
-#rk-edit-toolbar button{font-size:11px;padding:4px 8px;}
-#rk-edit-toolbar label{color:var(--gold2);font-size:11px;padding:0 4px;}
 
 /* ---- Status / toasts / modal ---- */
 #rk-status{position:absolute;top:64px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--gold);color:var(--gold2);padding:8px 16px;border-radius:8px;font-size:13px;z-index:12;display:none;}
@@ -438,8 +443,21 @@ button{font-family:inherit;}
 .modal .info{font-size:12px;color:var(--dim);margin:4px 0 8px;}
 .modal input,.modal select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 10px;font-size:13px;margin-bottom:2px;}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
-.tz-panels{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px;}
-@media(min-width:1300px){.tz-panels{grid-template-columns:repeat(4,minmax(0,1fr));}}
+.tz-panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:4px;}
+.modal.modal-trezor{width:min(720px,94vw);padding:12px;}
+.modal-trezor h3{font-size:13px;margin-bottom:6px;}
+.modal-trezor .tz-panels{gap:8px;}
+.modal-trezor .tz-panel{padding:8px 10px;gap:4px;border-radius:8px;}
+.modal-trezor .tz-panel h4{font-size:11px;margin:0;}
+.modal-trezor p.info{font-size:10px;margin:2px 0;}
+.modal-trezor label{font-size:10px;margin:3px 0 2px;}
+.modal-trezor input[type=range].tz-scroll{height:14px;margin-bottom:2px;}
+.modal-trezor input[type=number],.modal-trezor .rk-input{padding:4px 7px;font-size:12px;margin-bottom:0;}
+.modal-trezor .tz-quick{gap:3px;margin-top:2px;}
+.modal-trezor .tz-quick .btn{padding:4px 6px;font-size:10px;min-width:38px;}
+.modal-trezor .tz-panel > .btn.gold{padding:5px;font-size:11px;}
+.modal-trezor .modal-actions{margin-top:10px;}
+.modal-trezor .modal-actions .btn{padding:5px 12px;font-size:11px;}
 .tz-panel{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0;}
 .tz-panel h4{color:var(--gold2);font-size:13px;margin:0 0 4px;}
 .tz-scroll-wrap{display:flex;flex-direction:column;gap:6px;}
@@ -454,6 +472,16 @@ button{font-family:inherit;}
 .building-opt:disabled{opacity:.4;cursor:not-allowed;}
 .building-opt .b-name{font-size:13px;font-weight:600;}
 .building-opt .b-cost{font-size:11px;color:var(--dim);margin-top:2px;}
+
+/* Detailed building panel */
+.building-grid-detailed{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.building-opt .b-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.building-opt .b-icon{font-size:24px;}
+.building-opt .b-details{display:flex;flex-direction:column;gap:3px;font-size:11px;}
+.building-opt .b-count{color:var(--gold2);font-weight:600;}
+.building-opt .b-time{color:var(--dim);}
+.building-opt .b-cost{color:var(--txt);}
+.building-opt .not-enough{color:var(--err);font-size:10px;font-weight:600;}
 
 /* ---- Zoom ---- */
 #rk-zoom{position:absolute;right:14px;top:70px;display:flex;flex-direction:column;gap:6px;z-index:8;}
@@ -527,6 +555,7 @@ button{font-family:inherit;}
           <button class="rk-fab" id="rk-history-btn" data-i18n-attr="title=battleHistory"><span class="ic">📜</span></button>
           <button class="rk-fab gold" id="rk-trezor-btn" data-i18n-attr="title=treasuryTrezor"><span class="ic">💎</span></button>
           <button class="rk-fab" id="rk-hof-btn" data-i18n-attr="title=hallOfFame"><span class="ic">🏆</span></button>
+          <button class="rk-fab" id="rk-build-btn" data-i18n-attr="title=buildTitle"><span class="ic">🏗️</span></button>
           <button class="rk-fab" id="rk-settings-btn" data-i18n-attr="title=config"><span class="ic">⚙️</span></button>
         </div>
         <div id="rk-create-kingdom-fab" data-i18n-attr="title=createKingdom"><span class="ic" data-i18n="createKingdom">Create a New Kingdom</span></div>
@@ -644,6 +673,10 @@ button{font-family:inherit;}
               <div class="mkt-item" style="cursor:pointer;" id="rk-castle-prospect-btn" data-i18n-attr="title=prospectTitle">
                 <span class="mkt-ic">⛏️</span>
                 <span class="mkt-v" data-i18n="prospect">Prospect</span>
+              </div>
+              <div class="mkt-item" style="cursor:pointer;" id="rk-castle-build-btn" data-i18n-attr="title=buildTitle">
+                <span class="mkt-ic" id="rk-build-icon">🏗️</span>
+                <span class="mkt-v" data-i18n="build">Build</span>
               </div>
             </div>
           </div>
@@ -2361,6 +2394,7 @@ const act = $("#rk-active-battles");
       switchKingdomTitle: "Trocar de reino",
       prospect: "Prospectar",
       prospectTitle: "Prospectar recursos",
+      buildTitle: "Construir edifício",
 
       // Castle info text labels
       treasury: "Tesouro",
@@ -2593,6 +2627,7 @@ const act = $("#rk-active-battles");
       switchKingdomTitle: "Switch kingdom",
       prospect: "Prospect",
       prospectTitle: "Prospect resources",
+      buildTitle: "Build building",
 
       // Castle info text labels
       treasury: "Treasury",
@@ -3426,8 +3461,7 @@ const act = $("#rk-active-battles");
       </div>`
     );
     const modEl = root.querySelector(".modal");
-    if (modEl) modEl.classList.add("modal-wide");
-    if (modEl) modEl.classList.add("modal-extra-wide");
+    if (modEl) modEl.classList.add("modal-trezor");
 
     // Helper para bindar scroll + input + botoes de porcentagem
     const bindScrollGroup = (scrollSel, inputSel, btnAttr, totalFn) => {
@@ -3791,90 +3825,6 @@ const act = $("#rk-active-battles");
 
   function closeCastle() {
     $("#rk-castle").classList.remove("open");
-    castleEditMode = false;
-    castleEditSize = 100;
-    castleEditSizes = {};
-    castleEditPositions = {};
-  }
-
-  // Layout fixo padrão do castelo (posições e tamanhos aplicados a todos os reinos)
-  const DEFAULT_CASTLE_LAYOUT = {
-    mine: { left: 370, top: -72, size: 70 },
-    barracks: { left: 620, top: 88, size: 100 },
-    trezor: { left: 873, top: -34, size: 80 },
-    stronghold: { left: 632, top: -249, size: 100 },
-    mage_tower: { left: 1076, top: -137, size: 80 },
-    research_academy: { left: 204, top: -90, size: 90 },
-    obscura_temple: { left: 1011, top: 313, size: 120 },
-  };
-  // Posições salvas por reino (castleLayout: { [component]: { [buildingType]: { left, top } } })
-  function loadCastleLayout(component) {
-    try {
-      const all = JSON.parse(localStorage.getItem("rk-castle-layouts") || "{}");
-      return all[component] || DEFAULT_CASTLE_LAYOUT;
-    } catch (e) { return DEFAULT_CASTLE_LAYOUT; }
-  }
-  function saveCastleLayout(component, layout) {
-    try {
-      const all = JSON.parse(localStorage.getItem("rk-castle-layouts") || "{}");
-      all[component] = layout;
-      localStorage.setItem("rk-castle-layouts", JSON.stringify(all));
-    } catch (e) {}
-  }
-  function getCastleSize(btype) {
-    // Primeiro tenta o tamanho individual em memória (modo edit)
-    if (castleEditSizes[btype]) return castleEditSizes[btype];
-    // Depois tenta o layout salvo/default
-    const layout = selectedOwn ? loadCastleLayout(selectedOwn.component) : DEFAULT_CASTLE_LAYOUT;
-    return (layout && layout[btype] && layout[btype].size) || 100;
-  }
-  let castleEditMode = false;
-  let castleEditSize = 100;
-  let castleEditSizes = {}; // { btype: percent } tamanho individual por construção
-  let castleEditInfoEl = null;
-
-  // Posições temporárias (em memória) durante o modo edit — sobrescreve layout por reino
-  let castleEditPositions = {}; // { btype: { left, top } }
-
-  function applyCastleEditSize() {
-    const wrap = $("#rk-iso-buildings");
-    if (!wrap) return;
-    const globalFactor = castleEditSize / 100;
-    const baseLayout = selectedOwn ? loadCastleLayout(selectedOwn.component) : DEFAULT_CASTLE_LAYOUT;
-    wrap.querySelectorAll(".ikb[data-btype]").forEach((el) => {
-      const btype = el.getAttribute("data-btype");
-      // Tamanho: primeiro castleEditSizes (modo edit), depois layout (saved/default)
-      const ind = castleEditSizes[btype] || (baseLayout[btype] && baseLayout[btype].size) || 100;
-      const factor = globalFactor * (ind / 100);
-      const img = el.querySelector("img");
-      if (img) {
-        const baseW = img.naturalWidth || 100;
-        const baseH = img.naturalHeight || 130;
-        img.style.width = Math.round(baseW * factor) + "px";
-        img.style.height = Math.round(baseH * factor) + "px";
-        img.style.maxHeight = "none";
-        img.style.objectFit = "contain";
-      }
-      el.style.transform = `scale(${factor})`;
-      el.style.transformOrigin = "center bottom";
-    });
-    // Atualiza coord de cada um (mostra nome, x, y, size) — preserva botões +/−
-    wrap.querySelectorAll(".ikb[data-btype]").forEach((el) => {
-      const btype = el.getAttribute("data-btype");
-      const coord = el.querySelector(".rk-coord");
-      if (coord && coord.dataset.name) {
-        const sz = castleEditSizes[btype] || 100;
-        const txt = coord.querySelector(".rk-coord-text");
-        if (txt) {
-          txt.textContent = `${coord.dataset.name}: ${Math.round(el.offsetLeft)},${Math.round(el.offsetTop)} sz:${sz}`;
-        } else {
-          coord.textContent = `${coord.dataset.name}: ${Math.round(el.offsetLeft)},${Math.round(el.offsetTop)} sz:${sz}`;
-        }
-      }
-    });
-    // Atualiza label global
-    const sizeVal = document.querySelector("#rk-edit-size-val");
-    if (sizeVal) sizeVal.textContent = castleEditSize + "%";
   }
 
   async function renderIsoView() {
@@ -3882,15 +3832,9 @@ const act = $("#rk-active-battles");
     const ground = $("#rk-iso-ground");
     const wrap = $("#rk-iso-buildings");
     if (!scene || !ground || !wrap) return;
+    applyBrowserZoomFix();
 
     const st = selectedOwn ? ownStates[selectedOwn.component] : null;
-    // Salva posições atuais antes de recriar (preserva durante auto-refresh)
-    if (castleEditMode && wrap.children.length > 0) {
-      wrap.querySelectorAll(".ikb[data-btype]").forEach((el) => {
-        const t = el.getAttribute("data-btype");
-        castleEditPositions[t] = { left: el.offsetLeft, top: el.offsetTop };
-      });
-    }
     wrap.innerHTML = "";
     if (!st) {
       ground.style.backgroundImage = "";
@@ -3899,137 +3843,6 @@ const act = $("#rk-active-battles");
 
     const grass = await rkImg("grama");
     if (grass) ground.style.backgroundImage = `url("${grass}")`;
-
-    // Toolbar de edição do layout do castelo
-    let toolbar = scene.querySelector("#rk-edit-toolbar");
-    if (!toolbar) {
-      toolbar = document.createElement("div");
-      toolbar.id = "rk-edit-toolbar";
-      toolbar.innerHTML = `<button class="btn gold" id="rk-edit-toggle-btn">✏️ Edit Layout</button>
-        <button class="btn" id="rk-edit-reset-btn" style="display:none;">↺ Reset</button>
-        <button class="btn" id="rk-edit-save-btn" style="display:none;">💾 Save</button>
-        <button class="btn" id="rk-edit-cancel-btn" style="display:none;">✖ Close</button>
-        <label id="rk-edit-size-label" style="display:none;">Size:
-          <button class="btn" id="rk-edit-size-down">➖</button>
-          <span id="rk-edit-size-val">100%</span>
-          <button class="btn" id="rk-edit-size-up">➕</button>
-        </label>`;
-      scene.appendChild(toolbar);
-      toolbar.querySelector("#rk-edit-toggle-btn").addEventListener("click", () => {
-        castleEditMode = true;
-        castleEditSize = 100;
-        renderIsoView();
-      });
-      toolbar.querySelector("#rk-edit-reset-btn").addEventListener("click", () => {
-        if (!selectedOwn) return;
-        // Reset = remove layout salvo para forçar uso do DEFAULT_CASTLE_LAYOUT
-        try {
-          const all = JSON.parse(localStorage.getItem("rk-castle-layouts") || "{}");
-          delete all[selectedOwn.component];
-          localStorage.setItem("rk-castle-layouts", JSON.stringify(all));
-        } catch (e) {}
-        castleEditSizes = {};
-        castleEditPositions = {};
-        renderIsoView();
-        toast("Layout resetado para o padrão", false);
-      });
-      toolbar.querySelector("#rk-edit-save-btn").addEventListener("click", () => {
-        // Coleta posições e tamanhos atuais de todas as construções
-        const layout = {};
-        const sizes = {};
-        const wrapEl = $("#rk-iso-buildings");
-        if (wrapEl) {
-          wrapEl.querySelectorAll(".ikb[data-btype]").forEach((el) => {
-            const t = el.getAttribute("data-btype");
-            layout[t] = { left: el.offsetLeft, top: el.offsetTop };
-            sizes[t] = castleEditSizes[t] || 100;
-          });
-        }
-        // Imprime no console para você copiar
-        const data = {
-          kingdom: selectedOwn ? (selectedOwn.name || selectedOwn.component) : "?",
-          component: selectedOwn ? selectedOwn.component : "?",
-          buildings: {},
-        };
-        Object.keys(layout).forEach((t) => {
-          data.buildings[t] = {
-            left: layout[t].left,
-            top: layout[t].top,
-            size: sizes[t],
-          };
-        });
-        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        console.log("🏰 CASTLE LAYOUT — Copie este JSON:");
-        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        console.log(JSON.stringify(data, null, 2));
-        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        console.log("📋 Formato resumido (uma linha por edifício):");
-        Object.keys(data.buildings).forEach((t) => {
-          const b = data.buildings[t];
-          console.log(`  ${t}: left=${b.left}, top=${b.top}, size=${b.size}%`);
-        });
-        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        toast("Layout salvo no console (F12)", false);
-      });
-      toolbar.querySelector("#rk-edit-cancel-btn").addEventListener("click", () => {
-        castleEditMode = false;
-        castleEditSize = 100;
-        castleEditSizes = {};
-        castleEditPositions = {};
-        renderIsoView();
-      });
-      toolbar.querySelector("#rk-edit-size-up").addEventListener("click", () => {
-        castleEditSize = Math.min(200, castleEditSize + 10);
-        applyCastleEditSize();
-      });
-      toolbar.querySelector("#rk-edit-size-down").addEventListener("click", () => {
-        castleEditSize = Math.max(50, castleEditSize - 10);
-        applyCastleEditSize();
-      });
-    }
-    toolbar.querySelector("#rk-edit-toggle-btn").style.display = castleEditMode ? "none" : "inline-block";
-    toolbar.querySelector("#rk-edit-reset-btn").style.display = castleEditMode ? "inline-block" : "none";
-    toolbar.querySelector("#rk-edit-save-btn").style.display = castleEditMode ? "inline-block" : "none";
-    toolbar.querySelector("#rk-edit-cancel-btn").style.display = castleEditMode ? "inline-block" : "none";
-    const sizeLabel = toolbar.querySelector("#rk-edit-size-label");
-    if (sizeLabel) sizeLabel.style.display = castleEditMode ? "inline-flex" : "none";
-    const sizeVal = toolbar.querySelector("#rk-edit-size-val");
-    if (sizeVal) sizeVal.textContent = castleEditSize + "%";
-
-    if (castleEditMode) {
-      wrap.classList.add("rk-edit-mode");
-      wrap.style.padding = "0";
-      scene.style.overflow = "visible";
-    } else {
-      wrap.classList.remove("rk-edit-mode");
-      wrap.style.padding = "0 260px";
-      scene.style.overflow = "hidden";
-    }
-    if (castleEditMode) {
-      // aplica tamanho inicial após render (cobre todos os edifícios criados)
-      setTimeout(() => applyCastleEditSize(), 0);
-    }
-    // Aplica tamanho individual aos edifícios recém-criados (caso já existam castleEditSizes)
-    if (castleEditMode) {
-      wrap.querySelectorAll(".ikb[data-btype]").forEach((el) => {
-        const btype = el.getAttribute("data-btype");
-        if (castleEditSizes[btype] && castleEditSizes[btype] !== 100) {
-          const ind = castleEditSizes[btype];
-          const factor = (castleEditSize / 100) * (ind / 100);
-          const img = el.querySelector("img");
-          if (img) {
-            const baseW = img.naturalWidth || 100;
-            const baseH = img.naturalHeight || 130;
-            img.style.width = Math.round(baseW * factor) + "px";
-            img.style.height = Math.round(baseH * factor) + "px";
-          }
-          el.style.transform = `scale(${factor})`;
-          el.style.transformOrigin = "center bottom";
-        }
-      });
-    }
-
-    const layout = selectedOwn ? loadCastleLayout(selectedOwn.component) : {};
 
     const entries = [
       { type: "mine", count: st.mine, name: t("mine") },
@@ -4050,154 +3863,57 @@ const act = $("#rk-active-battles");
       const has = e.count > 0;
       el.className = "ikb" + (building ? " building" : "") + (has && e.count >= max ? " max" : "") + (has ? "" : " empty");
       el.title = `${e.name}: ${e.count}/${max}` + (building ? ` (${t("underConstruction")})` : "");
-      el.setAttribute("data-btype", e.type);
-      // Aplica posição: primeiro castleEditPositions (modo edit), depois layout salvo
-      const pos = castleEditPositions[e.type] || layout[e.type];
-      if (pos) {
-        el.style.position = "absolute";
-        el.style.left = pos.left + "px";
-        el.style.top = pos.top + "px";
-      }
-      // No modo edit: adiciona coordenadas visíveis e controles de tamanho
-      // IMPORTANTE: primeiro cria o conteúdo (imagem + badges) via DOM em vez de innerHTML,
-      // depois adiciona coord/resizeHandle por último (preserva os botões +/-)
-      el.innerHTML = "";
-      if (src) {
-        const img = document.createElement("img");
-        img.src = src;
-        img.alt = e.name;
-        img.setAttribute("draggable", "false");
-        el.appendChild(img);
-      } else {
-        const d = document.createElement("div");
-        d.style.cssText = "font-size:40px;line-height:1";
-        d.textContent = BUILD_ICONS[e.type] || "";
-        el.appendChild(d);
-      }
-      const appendBadge = (cls, html) => {
-        const b = document.createElement("div");
-        b.className = "ikb-badge" + (cls ? " " + cls : "");
-        b.innerHTML = html;
-        el.appendChild(b);
-      };
+      el.innerHTML = src
+        ? `<img src="${src}" alt="${e.name}" draggable="false">`
+        : `<div style="font-size:40px;line-height:1">${BUILD_ICONS[e.type]}</div>`;
       // Emoji ⚠️ para edifícios não construídos
       if (!has) {
-        appendBadge("", "⚠️");
+        el.innerHTML += `<div class="ikb-badge" style="background:rgba(248,81,73,.9);color:#fff;font-size:14px;line-height:1;padding:2px 6px;border-radius:6px;">⚠️</div>`;
+        // Clique para construir
         el.style.cursor = "pointer";
         el.onclick = () => actionBuild(e.type);
       }
       if (e.type === "mine" && has) {
-        appendBadge("", `${kgldHtml(14)} ${t("unclaimedGold")}: ${fmtAmount(st.unclaimedGold)}`);
+        el.innerHTML += `<div class="ikb-badge">${kgldHtml(14)} ${t("unclaimedGold")}: ${fmtAmount(st.unclaimedGold)}</div>`;
       }
       if (e.type === "barracks" && has) {
         const claimable = (st.armyToBeClaimed || 0) > 0 && (st.armyUnitsCompleted || 0) <= now;
         if (claimable) {
-          appendBadge("ready", `⚔️ ${st.armyToBeClaimed} ${t("readyToClaim")}`);
+          el.innerHTML += `<div class="ikb-badge ready">⚔️ ${st.armyToBeClaimed} ${t("readyToClaim")}</div>`;
         } else if ((st.armyToBeClaimed || 0) > 0 && (st.armyUnitsCompleted || 0) > now) {
-          appendBadge("busy", `⏳ ${st.armyToBeClaimed} Ready in: <span data-rk-countdown="${st.armyUnitsCompleted}">${t("training")}</span>`);
+          el.innerHTML += `<div class="ikb-badge busy">⏳ ${st.armyToBeClaimed} Ready in: <span data-rk-countdown="${st.armyUnitsCompleted}">${t("training")}</span></div>`;
         } else if ((st.armyUnitsCompleted || 0) > now) {
-          appendBadge("busy", `<span data-rk-countdown="${st.armyUnitsCompleted}">⏳ ${t("training")}</span>`);
+          el.innerHTML += `<div class="ikb-badge busy"><span data-rk-countdown="${st.armyUnitsCompleted}">⏳ ${t("training")}</span></div>`;
         } else {
-          appendBadge("", `🛡️ ${fmtAmount(st.defendingUnits)} ${t("defenders")}`);
+          el.innerHTML += `<div class="ikb-badge">🛡️ ${fmtAmount(st.defendingUnits)} ${t("defenders")}</div>`;
         }
       }
       if (e.type === "trezor" && has) {
-        appendBadge("", `💎 ${fmtAmount(st.trezor)}`);
+        el.innerHTML += `<div class="ikb-badge">💎 ${fmtAmount(st.trezor)}</div>`;
       }
       if (e.type === "mage_tower" && has) {
         const claimable = (st.missilesToBeClaimed || 0) > 0 && (st.missilesCompleted || 0) <= now;
         if (claimable) {
-          appendBadge("ready", `🚀 ${st.missilesToBeClaimed} ${t("readyToClaim")}`);
+          el.innerHTML += `<div class="ikb-badge ready">🚀 ${st.missilesToBeClaimed} ${t("readyToClaim")}</div>`;
         } else if ((st.missilesToBeClaimed || 0) > 0 && (st.missilesCompleted || 0) > now) {
-          appendBadge("busy", `🚀 ${st.missilesToBeClaimed} Ready in: <span data-rk-countdown="${st.missilesCompleted}">${t("manufacturingMissiles")}</span>`);
+          el.innerHTML += `<div class="ikb-badge busy">🚀 ${st.missilesToBeClaimed} Ready in: <span data-rk-countdown="${st.missilesCompleted}">${t("manufacturingMissiles")}</span></div>`;
         } else if ((st.missilesCompleted || 0) > now) {
-          appendBadge("busy", `<span data-rk-countdown="${st.missilesCompleted}">🚀 ${t("manufacturingMissiles")}</span>`);
+          el.innerHTML += `<div class="ikb-badge busy"><span data-rk-countdown="${st.missilesCompleted}">🚀 ${t("manufacturingMissiles")}</span></div>`;
         } else {
-          appendBadge("", `🚀 ${fmtAmount(st.kingdomMissiles)} ${t("missiles")}`);
+          el.innerHTML += `<div class="ikb-badge">🚀 ${fmtAmount(st.kingdomMissiles)} ${t("missiles")}</div>`;
         }
       }
       if (e.type === "obscura_temple" && has) {
         const claimable = (st.amBarriersToBeClaimed || 0) > 0 && (st.amBarrierCompleted || 0) <= now;
         if (claimable) {
-          appendBadge("ready", `🛡️ ${st.amBarriersToBeClaimed} ${t("readyToClaim")}`);
+          el.innerHTML += `<div class="ikb-badge ready">🛡️ ${st.amBarriersToBeClaimed} ${t("readyToClaim")}</div>`;
         } else if ((st.amBarriersToBeClaimed || 0) > 0 && (st.amBarrierCompleted || 0) > now) {
-          appendBadge("busy", `🛡️ ${st.amBarriersToBeClaimed} Ready in: <span data-rk-countdown="${st.amBarrierCompleted}">${t("manufacturingBarriers")}</span>`);
+          el.innerHTML += `<div class="ikb-badge busy">🛡️ ${st.amBarriersToBeClaimed} Ready in: <span data-rk-countdown="${st.amBarrierCompleted}">${t("manufacturingBarriers")}</span></div>`;
         } else if ((st.amBarrierCompleted || 0) > now) {
-          appendBadge("busy", `<span data-rk-countdown="${st.amBarrierCompleted}">🛡️ ${t("manufacturingBarriers")}</span>`);
+          el.innerHTML += `<div class="ikb-badge busy"><span data-rk-countdown="${st.amBarrierCompleted}">🛡️ ${t("manufacturingBarriers")}</span></div>`;
         } else {
-          appendBadge("", `🛡️ ${fmtAmount(st.antiMissileBarriers)} ${t("barriers")}`);
+          el.innerHTML += `<div class="ikb-badge">🛡️ ${fmtAmount(st.antiMissileBarriers)} ${t("barriers")}</div>`;
         }
-      }
-      if (e.type === "stronghold" && has) {
-        appendBadge("", `🏰 ${e.count}/1`);
-      }
-      // Em MODO EDIT: adiciona coord (com botões +/-) e resize handle por ÚLTIMO (sobrevivem)
-      if (castleEditMode) {
-        const coord = document.createElement("div");
-        coord.className = "rk-coord";
-        coord.setAttribute("data-btype", e.type);
-        coord.dataset.name = e.name;
-        const sz = castleEditSizes[e.type] || (layout[e.type] && layout[e.type].size) || 100;
-        coord.innerHTML = `<span class="rk-coord-text">${e.name}: 0,0 sz:${sz}</span>
-          <button class="rk-size-btn rk-size-minus" title="Diminuir">−</button>
-          <button class="rk-size-btn rk-size-plus" title="Aumentar">+</button>`;
-        el.appendChild(coord);
-        const resizeHandle = document.createElement("div");
-        resizeHandle.className = "rk-resize-handle";
-        resizeHandle.title = "Drag to resize";
-        el.appendChild(resizeHandle);
-        // Atualiza coordenadas ao arrastar
-        const updateCoord = () => {
-          const s = castleEditSizes[e.type] || (layout[e.type] && layout[e.type].size) || 100;
-          const txt = coord.querySelector(".rk-coord-text");
-          if (txt) txt.textContent = `${e.name}: ${Math.round(el.offsetLeft)},${Math.round(el.offsetTop)} sz:${s}`;
-        };
-        updateCoord();
-        el._updateCoord = updateCoord;
-        // Botões +/- individuais (com btype capturado ANTES de qualquer callback)
-        const btype = e.type;
-        const minusBtn = coord.querySelector(".rk-size-minus");
-        const plusBtn = coord.querySelector(".rk-size-plus");
-        if (minusBtn) {
-          minusBtn.addEventListener("pointerdown", (ev) => ev.stopPropagation());
-          minusBtn.addEventListener("click", (ev) => {
-            ev.stopPropagation();
-            ev.preventDefault();
-            const cur = castleEditSizes[btype] || 100;
-            castleEditSizes[btype] = Math.max(30, cur - 10);
-            applyCastleEditSize();
-          });
-        }
-        if (plusBtn) {
-          plusBtn.addEventListener("pointerdown", (ev) => ev.stopPropagation());
-          plusBtn.addEventListener("click", (ev) => {
-            ev.stopPropagation();
-            ev.preventDefault();
-            const cur = castleEditSizes[btype] || 100;
-            castleEditSizes[btype] = Math.min(500, cur + 10);
-            applyCastleEditSize();
-          });
-        }
-        // Resize handle (com btype capturado)
-        let resizing = false, rsx = 0, rsy = 0, rBaseSize = 100;
-        resizeHandle.addEventListener("pointerdown", (ev) => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          resizing = true;
-          rsx = ev.clientX; rsy = ev.clientY;
-          rBaseSize = castleEditSizes[btype] || 100;
-        });
-        resizeHandle.addEventListener("pointermove", (ev) => {
-          if (!resizing) return;
-          const dx = ev.clientX - rsx;
-          const dy = ev.clientY - rsy;
-          const delta = Math.round((dx + dy) / 2);
-          const newSize = Math.max(30, Math.min(500, rBaseSize + delta));
-          castleEditSizes[btype] = newSize;
-          applyCastleEditSize();
-        });
-        resizeHandle.addEventListener("pointerup", () => { resizing = false; });
-        resizeHandle.addEventListener("pointercancel", () => { resizing = false; });
       }
       if (building) {
         const readyAt = (st.buildingConstructionStart || 0) + (st.buildingConstructionDuration || 0);
@@ -4246,43 +3962,6 @@ const act = $("#rk-active-battles");
         else if (e.type === "mine") el.addEventListener("click", () => actionClaim());
       }
       wrap.appendChild(el);
-      // Drag-and-drop no modo de edição
-      if (castleEditMode) {
-        let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0, moved = 0;
-        const onDown = (e) => {
-          // Não iniciar drag se clicou no resize handle
-          if (e.target.classList && e.target.classList.contains("rk-resize-handle")) return;
-          e.preventDefault();
-          e.stopPropagation();
-          dragging = true;
-          moved = 0;
-          sx = e.clientX; sy = e.clientY;
-          const rect = el.getBoundingClientRect();
-          const wrapRect = wrap.getBoundingClientRect();
-          ox = rect.left - wrapRect.left;
-          oy = rect.top - wrapRect.top;
-          el.style.left = ox + "px";
-          el.style.top = oy + "px";
-          el.style.position = "absolute";
-          el.classList.add("dragging");
-          el.setPointerCapture && el.setPointerCapture(e.pointerId);
-        };
-        const onMove = (e) => {
-          if (!dragging) return;
-          moved = Math.max(moved, Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy));
-          let nx = ox + (e.clientX - sx);
-          let ny = oy + (e.clientY - sy);
-          // Sem limite — permite posicionar livremente (até acima da metade da tela)
-          el.style.left = nx + "px";
-          el.style.top = ny + "px";
-          if (el._updateCoord) el._updateCoord();
-        };
-        const onUp = () => { dragging = false; el.classList.remove("dragging"); };
-        el.addEventListener("pointerdown", onDown);
-        el.addEventListener("pointermove", onMove);
-        el.addEventListener("pointerup", onUp);
-        el.addEventListener("pointercancel", onUp);
-      }
     }
   }
 
@@ -4320,6 +3999,13 @@ const act = $("#rk-active-battles");
     const nowSec = Math.floor(Date.now() / 1000);
     const reqMage = s.mageTower > 0;
     const reqObscura = s.obscuraTemple > 0;
+
+    // Load construction icon for build button
+    const buildIconUrl = await rkImg("construction");
+    const buildIconEl = $("#rk-build-icon");
+    if (buildIconEl && buildIconUrl) {
+      buildIconEl.innerHTML = `<img src="${buildIconUrl}" style="width:20px;height:20px;">`;
+    }
 
     // Emoji ⚠️ para edifícios não construídos
     const defHead = $("#prod-defenders-head");
@@ -4411,20 +4097,34 @@ const act = $("#rk-active-battles");
 
   function actionBuild(preType) {
     if (!requireOwn()) return;
+    const st = ownStates[selectedOwn.component];
+    const treasury = st ? st.kgld : 0;
     const opts = Object.entries(BUILD_NAMES).map(([type, name]) => {
-      const st = ownStates[selectedOwn.component];
       const count = st ? st[BUILD_COUNT_KEY[type]] || 0 : 0;
       const max = BUILD_MAX[type];
       const full = count >= max;
+      const cost = BUILD_COSTS[type];
+      const timeHours = Math.round(BUILD_TIMES[type] / 3600);
+      const canAfford = treasury >= cost;
+      const icon = BUILD_ICONS[type] || "";
       const sel = preType === type ? " selected" : "";
-      return `<button class="building-opt${sel}" data-type="${type}"${full ? " disabled" : ""}>
-         <div class="b-name">${name}${full ? " (máx)" : ""}</div>
-         <div class="b-cost">${BUILD_COSTS[type]} KGLD · ${Math.round(BUILD_TIMES[type] / 3600)}h · máx ${max}</div>
-       </button>`;
+      const disabled = full || !canAfford;
+      const notEnough = !canAfford && !full ? ' <span class="not-enough">(KGLD insuficiente)</span>' : '';
+      return `<button class="building-opt${sel}" data-type="${type}"${disabled ? " disabled" : ""}>
+        <div class="b-header">
+          <span class="b-icon">${icon}</span>
+          <span class="b-name">${name}</span>
+        </div>
+        <div class="b-details">
+          <div class="b-count">${count} / ${max}</div>
+          <div class="b-time">⏱️ ${timeHours}h</div>
+          <div class="b-cost">${kgldHtml(14)} ${cost}${notEnough}</div>
+        </div>
+      </button>`;
     }).join("");
     const root = openModal(
-      "🏰 Construir edifício",
-      `<div class="building-grid">${opts}</div><p class="info">Escolha um edifício. O custo sai do tesouro do reino.</p>`,
+      "🏗️ Kingdom Structures",
+      `<div class="building-grid-detailed">${opts}</div><p class="info">Clique para selecionar, depois confirme. Custo sai do tesouro (${fmtAmount(treasury)} KGLD).</p>`,
       async (ovl) => {
         const sel = ovl.querySelector(".building-opt.selected:not([disabled])");
         const type = sel ? sel.dataset.type : null;
@@ -4432,6 +4132,8 @@ const act = $("#rk-active-battles");
         await sendManifest(M.create_building(account, selectedOwn.component, type, selectedOwn.nftId), `Construir ${BUILD_NAMES[type]}`);
       }
     );
+    const mbox = root.querySelector(".modal");
+    if (mbox) mbox.classList.add("modal-wide");
     root.querySelectorAll(".building-opt:not([disabled])").forEach((b) => {
       b.addEventListener("click", () => {
         root.querySelectorAll(".building-opt").forEach((x) => x.classList.remove("selected"));
@@ -4589,7 +4291,7 @@ const act = $("#rk-active-battles");
     updateProgress(0, toLoad.length);
 
     hofLoadingPromise = (async () => {
-      const CHUNK = 8; // requests paralelos
+      const CHUNK = 20; // requests paralelos (a site API aguenta; HTTP/2 multiplexa)
       let done = 0;
       for (let i = 0; i < toLoad.length; i += CHUNK) {
         const chunk = toLoad.slice(i, i + CHUNK);
@@ -4601,6 +4303,8 @@ const act = $("#rk-active-battles");
           done++;
           updateProgress(done, toLoad.length);
         }));
+        // Renderiza progressivamente: mostra resultados parciais a cada lote
+        renderHofBody();
       }
     })();
 
@@ -4799,6 +4503,7 @@ safeAdd("rk-kingdom", "change", (e) => { if (e.target.value) selectOwnKingdom(e.
       if (p) p.classList.add("hidden");
     });
     safeAdd("rk-castle-build", "click", () => actionBuild());
+    safeAdd("rk-castle-build-btn", "click", () => actionBuild());
     safeAdd("rk-castle-withdraw", "click", actionWithdraw);
     safeAdd("rk-castle-deposit", "click", actionTreasury);
     safeAdd("rk-castle-prospect-btn", "click", actionProspect);
@@ -4849,11 +4554,12 @@ safeAdd("rk-kingdom", "change", (e) => { if (e.target.value) selectOwnKingdom(e.
       });
     });
     safeAdd("rk-settings-btn", "click", openSettingsModal);
+    safeAdd("rk-build-btn", "click", () => actionBuild());
   }
 
   async function loadUIImages() {
     try {
-      const [globalUrl, batalhaUrl, cartaUrl, pergaminhoUrl, trezor2Url, settingsUrl, hofUrl] = await Promise.all([
+      const [globalUrl, batalhaUrl, cartaUrl, pergaminhoUrl, trezor2Url, settingsUrl, hofUrl, buildUrl] = await Promise.all([
         rkImg("Global"),
         rkImg("batalha"),
         rkImg("carta"),
@@ -4861,6 +4567,7 @@ safeAdd("rk-kingdom", "change", (e) => { if (e.target.value) selectOwnKingdom(e.
         rkImg("trezor2"),
         rkImg("settings"),
         rkImg("hof"),
+        rkImg("construction"),
       ]);
 
       const setIcon = (sel, url, fallback) => {
@@ -4877,6 +4584,7 @@ safeAdd("rk-kingdom", "change", (e) => { if (e.target.value) selectOwnKingdom(e.
       setIcon("#rk-trezor-btn .ic", trezor2Url, "💎");
       setIcon("#rk-hof-btn .ic", hofUrl, "🏆");
       setIcon("#rk-settings-btn .ic", settingsUrl, "⚙️");
+      setIcon("#rk-build-btn .ic", buildUrl, "🏗️");
     } catch (e) {}
   }
 
@@ -4905,6 +4613,8 @@ safeAdd("rk-kingdom", "change", (e) => { if (e.target.value) selectOwnKingdom(e.
     loadAll();      // depois carrega reinos (precisa de account para próprios)
     try { setupMap(); } catch (e) { showFatal("Mapa: " + e.message); }
     applyTerrain();
+    applyBrowserZoomFix();
+    window.addEventListener("resize", applyBrowserZoomFix);
     loadUIImages();
     startAutoRefresh();
     battleTimer = setInterval(() => refreshBattles(), 30000);
