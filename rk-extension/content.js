@@ -48,7 +48,8 @@
       trezor2: chrome.runtime.getURL("imagens/Trezor2.png"),
       mais: chrome.runtime.getURL("imagens/mais.png"),
       settings: chrome.runtime.getURL("imagens/settings.png"),
-      hof: chrome.runtime.getURL("imagens/Hof.png")
+      hof: chrome.runtime.getURL("imagens/Hof.png"),
+      construction: chrome.runtime.getURL("imagens/construction.png")
     };
   }
 
