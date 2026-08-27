@@ -17,3 +17,13 @@ Open Extensions Page: Open Chrome, Brave, or Edge, type chrome://extensions (or 
 Turn on Developer Mode: Enable the Developer mode toggle in the top-right corner of the page.
 
 Load the Extension: Click the Load unpacked button (top-left) and select the rk-extension folder.
+
+<img width="668" height="667" alt="image" src="https://github.com/user-attachments/assets/e0ae1cd8-fe6f-48b5-8104-4e5117656024" />
+
+<img width="1278" height="372" alt="image" src="https://github.com/user-attachments/assets/237d01f7-189e-4689-a921-aa5d170bc2a7" />
+
+<img width="1279" height="617" alt="image" src="https://github.com/user-attachments/assets/8e9cbfe8-4594-423b-aedf-c1b89b2fcaad" />
+
+<img width="942" height="673" alt="image" src="https://github.com/user-attachments/assets/7a59ff56-b2ed-4c14-a3e3-4647c611a219" />
+
+
